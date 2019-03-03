@@ -24,8 +24,6 @@ PURPOSE.  See the above copyright notice for more information.
 #include <vtkObject.h>
 #include <vtkStdString.h>
 
-class vtkStringArray;
-
 class vtkMaterial : public vtkObject
 {
 public:
@@ -35,8 +33,11 @@ public:
   vtkGetMacro(Name, vtkStdString);
   vtkSetMacro(Name, vtkStdString);
 
-  vtkGetMacro(TextureNames, vtkStringArray*);
-  vtkSetMacro(TextureNames, vtkStringArray*);
+  vtkGetMacro(AlbedoTextureName, vtkStdString);
+  vtkSetMacro(AlbedoTextureName, vtkStdString);
+
+  vtkGetMacro(TCoordsId, int);
+  vtkSetMacro(TCoordsId, int);
 
 protected:
   vtkMaterial();
@@ -47,7 +48,9 @@ private:
   void operator=(const vtkMaterial&) = delete;
 
   vtkStdString Name;
-  vtkStringArray* TextureNames;
+
+  vtkStdString AlbedoTextureName;
+  int TCoordsId;
 };
 
 #endif

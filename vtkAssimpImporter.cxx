@@ -460,6 +460,8 @@ void vtkAssimpImporter::ProcessMaterials(const aiScene* pScene)
     unsigned int numTextures = pMaterial->GetTextureCount(aiTextureType_DIFFUSE);
     for (unsigned int dTextureId = 0; dTextureId < numTextures; dTextureId++)
     {
+      // WARNING: Only one albedo map is supported per material.
+
       aiString texturePath;
       if (pMaterial->GetTexture(aiTextureType_DIFFUSE, dTextureId, &texturePath) != AI_SUCCESS)
       {
@@ -503,12 +505,18 @@ void vtkAssimpImporter::ProcessMaterials(const aiScene* pScene)
         textureName = textureFileName.substr(0, i);
       }
 
-      std::map<std::string, vtkTexture*> actorTextureMap = this->Actor->GetProperty()->GetAllTextures();
-      if (actorTextureMap.find(textureName) != actorTextureMap.end())
+      // Material albedo map name
+      material->SetAlbedoTextureName(textureName);
+
+      // Material texture Id
+      int textureIndex;
+      if (pMaterial->Get(AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, dTextureId), textureIndex) != AI_SUCCESS)
       {
-        vtkIdType actorTextureId = distance(actorTextureMap.begin(), actorTextureMap.find(textureName));
-        material->GetTextureNames()->InsertNextValue(textureName);
+        textureIndex = 0;
       }
+      material->SetTCoordsId(textureIndex);
+
+      // Check if the texture already exists
       if (this->Actor->GetProperty()->GetTexture(textureName) != nullptr)
       {
         continue;
@@ -534,24 +542,7 @@ void vtkAssimpImporter::ProcessMaterials(const aiScene* pScene)
       texture->MipmapOn();
       this->Actor->GetProperty()->SetTexture(textureName, texture);
 
-      std::map<std::string, vtkTexture*> actorTextureMap2 = this->Actor->GetProperty()->GetAllTextures();
-      if (actorTextureMap2.find(textureName) != actorTextureMap2.end())
-      {
-        vtkIdType actorTextureId = distance(actorTextureMap2.begin(), actorTextureMap2.find(textureName));
-        material->GetTextureNames()->InsertNextValue(textureName);
-      }
       imageReader->Delete();
-
-      //Material texture Id
-      int textureIndex;
-      if (pMaterial->Get(AI_MATKEY_UVWSRC(aiTextureType_DIFFUSE, dTextureId), textureIndex) != AI_SUCCESS)
-      {
-        textureIndex = 0;
-      }
-
-      std::stringstream tCoordsName;
-      tCoordsName << "TCoords_" << textureIndex;
-      this->Mapper->MapDataArrayToMultiTextureAttribute(textureName, tCoordsName.str().c_str(), vtkDataObject::FIELD_ASSOCIATION_POINTS);
     }
 
     unsigned int numOpacityTextures = pMaterial->GetTextureCount(aiTextureType_OPACITY);

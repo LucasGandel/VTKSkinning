@@ -70,6 +70,15 @@ protected:
   /** Override vtkOpenGLPolyDataMapper::UpdateShaders() to call SetSkinningShaderParameters(). */
   void UpdateShaders(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) override;
 
+  /** Override vtkOpenGLPolyDataMapper::BuildShaders() to add custom shader replacements. */
+  void BuildShaders(std::map<vtkShader::Type, vtkShader *> shaders, vtkRenderer *ren, vtkActor *act) override;
+
+  /** Override vtkOpenGLPolyDataMapper::SetMapperShaderParameters to handle multi material */
+  void SetMapperShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) override;
+
+  /** Override vtkOpenGLPolyDataMapper::HaveTextures to prevent the upload of actor texture */
+  bool HaveTextures(vtkActor *actor) override;
+
   /** Set the shader parameters related to Skinning, called by UpdateShader */
   virtual void SetSkinningShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
 
@@ -101,8 +110,11 @@ private:
 
   bool IsSkinnable; // Indicates wether or not the required parameters are set to perform skinning.
 
+  // Handle multiple material.
+  // Textures and TCoords arays are indexed by material ids
   std::vector<vtkMaterial*> Materials;
-
+  vtkOpenGLVertexBufferObject* VBOTCoords;
+  bool HaveTexturedMaterials;
 };
 
 #endif
