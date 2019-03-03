@@ -67,9 +67,6 @@ protected:
   /** Build vertex attributes before calling the superclass. */
   void BuildBufferObjects(vtkRenderer *ren, vtkActor *act) override;
 
-  /** Override vtkOpenGLPolyDataMapper::UpdateShaders() to call SetSkinningShaderParameters(). */
-  void UpdateShaders(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act) override;
-
   /** Override vtkOpenGLPolyDataMapper::BuildShaders() to add custom shader replacements. */
   void BuildShaders(std::map<vtkShader::Type, vtkShader *> shaders, vtkRenderer *ren, vtkActor *act) override;
 
@@ -82,18 +79,14 @@ protected:
   /** Set the shader parameters related to Skinning, called by UpdateShader */
   virtual void SetSkinningShaderParameters(vtkOpenGLHelper &cellBO, vtkRenderer *ren, vtkActor *act);
 
-  /** Update animation frame before calling the superclass.
-    WARNING: Unused. Might be needed to update animation */
-  void RenderPieceStart(vtkRenderer *ren, vtkActor *act) override;
-
   /** Handle multi material texturing */
-  void AddShaderTCoordReplacement(vtkActor* actor);
+  virtual void AddShaderTCoordReplacement(vtkActor* actor);
 
   /** Handle mesh skinning */
-  void AddShaderPositionVCReplacement();
+  virtual void AddShaderPositionVCReplacement();
 
   /** Handle normal skinning */
-  void AddShaderNormalReplacement();
+  virtual void AddShaderNormalReplacement();
 
 private:
  vtkSkeletonPolyDataMapper(const vtkSkeletonPolyDataMapper&) = delete;

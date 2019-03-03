@@ -238,23 +238,6 @@ void vtkSkeletonPolyDataMapper::BuildShaders(
 }
 
 //-----------------------------------------------------------------------------
-void vtkSkeletonPolyDataMapper::UpdateShaders(
-  vtkOpenGLHelper &cellBO, vtkRenderer* ren, vtkActor *actor)
-{
-  Superclass::UpdateShaders(cellBO, ren, actor);
-
-  /*
-  * Send skinning-related uniforms to shaders.
-  * Here we are right after the Superclass call to
-  * "InvokeEvent(vtkCommand::UpdateShaderEvent, cellBO.Program);"
-  */
-  if (cellBO.Program)
-  {
-    this->SetSkinningShaderParameters(cellBO, ren, actor);
-  }
-}
-
-//-----------------------------------------------------------------------------
 bool vtkSkeletonPolyDataMapper::HaveTextures(vtkActor *actor)
 {
   // Overriden to prevent handling of actor textures when we index textures
@@ -313,6 +296,9 @@ void vtkSkeletonPolyDataMapper::SetMapperShaderParameters(vtkOpenGLHelper &cellB
   // Needs to be done prior to adding the TCoords VBO to ensure that the VAO
   // is ready.
   Superclass::SetMapperShaderParameters(cellBO, ren, actor);
+
+  // Send skinning-related uniforms to shaders.
+  this->SetSkinningShaderParameters(cellBO, ren, actor);
 
   // Handle multiple TCoords array indexed by material id.
   if (this->VBOTCoords == nullptr)
@@ -392,12 +378,6 @@ void vtkSkeletonPolyDataMapper::SetSkinningShaderParameters(vtkOpenGLHelper &cel
   cellBO.Program->SetUniformMatrix4x4v("SkeletonPose",
     static_cast<int>(boneTransforms.size()) / 16,
     &boneTransforms[0]);
-}
-
-//-----------------------------------------------------------------------------
-void vtkSkeletonPolyDataMapper::RenderPieceStart(vtkRenderer* ren, vtkActor *actor)
-{
-  Superclass::RenderPieceStart(ren, actor);
 }
 
 //-----------------------------------------------------------------------------
@@ -606,5 +586,3 @@ void vtkSkeletonPolyDataMapper::InsertNextMaterial(vtkMaterial* material)
   material->Register(this);
   this->Materials.push_back(material);
 }
-
-
